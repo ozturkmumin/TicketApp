@@ -2,8 +2,10 @@
 import Link from "next/link";
 import { useState } from "react";
 const submitEvent = new Event("submit") as Event;
-
+import { useRouter } from "next/navigation";
+import router from "next/router";
 const Register = () => {
+  const router = useRouter();
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -14,9 +16,21 @@ const Register = () => {
 
     if (!name || !email || !password) {
       setError("All fields are necessary.");
-      return;
     }
     try {
+      const resUserExists = await fetch("api/userExists", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ email }),
+      });
+
+      const { user } = await resUserExists.json();
+
+      if (user) {
+        setError("User already exists.");
+      }
       const res = await fetch("api/register", {
         method: "POST",
         headers: {
@@ -29,20 +43,22 @@ const Register = () => {
         }),
       });
       if (res.ok) {
-        const formElement = document.getElementById("formElement") as HTMLFormElement | null;
+        const formElement = document.getElementById(
+          "formElement"
+        ) as HTMLFormElement | null;
         const form = e.target as HTMLFormElement;
-        
+
         if (formElement) {
           formElement.reset();
+          router.push("/");
         }
-      }else {
+      } else {
         alert("User registration failed.");
       }
     } catch (error) {
       alert(`Error during registration: ${error}`);
     }
   };
-  console.log("Name", name);
 
   return (
     <div className="container">
@@ -50,7 +66,11 @@ const Register = () => {
         <div className="card card-compact w-96 shadow-xl bg-gray-50">
           <div className="card-body text-center">
             <h2 className="text-lg font-bold py-2">Register</h2>
-            <form id="formElement" onSubmit={handleSubmit} className="gap-4 flex flex-col">
+            <form
+              id="formElement"
+              onSubmit={handleSubmit}
+              className="gap-4 flex flex-col"
+            >
               <div>
                 <input
                   onChange={(e) => setName(e.target.value)}
@@ -69,6 +89,7 @@ const Register = () => {
               </div>
               <div>
                 <input
+                  onChange={(e) => setPassword(e.target.value)}
                   type="password"
                   className="shadow-2xl w-full p-3 rounded-lg"
                   placeholder="Password"
@@ -81,7 +102,7 @@ const Register = () => {
             {error && <p className="bg-red-500 text-white p-1">{error}</p>}
             <div className="flex text-xs">
               Create a new account if you don't have one{" "}
-              <Link className="underline ms-1 font-medium" href="/deneme">
+              <Link className="underline ms-1 font-medium" href={"/"}>
                 Open Account
               </Link>
             </div>

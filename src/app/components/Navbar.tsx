@@ -1,11 +1,11 @@
 import React from "react";
 
-const Navbar = () => {
+const Navbar = ({ title }: { title: string }) => {
   return (
     <>
       <div className="navbar   bg-sky-200">
         <div className="flex-1">
-          <a className="btn btn-ghost normal-case text-xl">daisyUI</a>
+          <a className="btn btn-ghost normal-case text-xl">{title}</a>
         </div>
         <div className="flex-none">
           <ul className="menu menu-horizontal px-1">
